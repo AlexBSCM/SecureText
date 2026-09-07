@@ -1,0 +1,27 @@
+# Build outputs
+**/build/
+**/out/
+**/.gradle/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Local
+local.properties
+keystore.properties
+*.jks
+*.keystore
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/

@@ -1,0 +1,28 @@
+# Gradle / Android
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+.cxx/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+
+# Logs
+*.log
+
+# Keystores (never commit)
+*.jks
+*.keystore
+
+# Local config
+keystore.properties
+
+# Kotlin compiler cache
+.kotlin/

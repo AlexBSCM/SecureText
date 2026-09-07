@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Secure Text</string>
+    <string name="nav_identity">Моя идентичность</string>
+    <string name="nav_encrypt">Шифрование</string>
+    <string name="nav_decrypt">Расшифровка</string>
+    <string name="nav_contacts">Контакты</string>
+    <string name="nav_settings">Настройки</string>
+    <string name="screen_identity_title">Моя идентичность</string>
+    <string name="screen_encrypt_title">Шифрование</string>
+    <string name="screen_decrypt_title">Расшифровка</string>
+    <string name="screen_contacts_title">Контакты</string>
+    <string name="screen_settings_title">Настройки</string>
+    <string name="placeholder_short">Ещё не реализовано</string>
+    <string name="placeholder_long">Этот экран будет заполнен на следующих этапах. Сейчас только скелетон.</string>
+</resources>
