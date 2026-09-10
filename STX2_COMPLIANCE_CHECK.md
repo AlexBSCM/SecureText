@@ -337,7 +337,7 @@ ephemeral/nonce), чтобы любая реализация могла пров
 1. Fingerprint: STX2.md (SHA-256 от canonical JSON).
 2. Backup AEAD: ChaCha20-Poly1305, 12-байт nonce, AAD = `SecureText private key v2`.
 3. Replay: не в v1.
-4. Криптобиблиотека: Google Tink.
+4. Криптобиблиотека: BouncyCastle `bcprov-jdk18on` (X25519, Ed25519, XChaCha20-Poly1305, HKDF-SHA256, Argon2id).
 5. Verified/история контактов: да, в Android v1.
 6. Пароли: 8+ символов, рекомендация 12+.
 7. QR: не в v1.

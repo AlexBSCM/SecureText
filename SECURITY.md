@@ -31,7 +31,7 @@
 | Полностью скомпрометированный телефон (root с активным malware) | Если атакующий контролирует OS, никакое приложение не поможет. |
 | Скриншот уже расшифрованного сообщения, сделанный пользователем | Не наша зона ответственности. |
 | Пользователь сам передал пароль или приватный ключ | Социальная инженерия. |
-| Утечка через hardware (side-channel на конкретном устройстве) | Митигация: использовать Tink/Android Keystore, прошедшие аудит. |
+| Утечка через hardware (side-channel на конкретном устройстве) | Митигация: использовать BouncyCastle/Android Keystore, прошедшие аудит. |
 | Скомпрометированные зависимости (supply chain) | Митигация: pinned versions, reproducible builds, GPG-верификация артефактов. |
 | Атака на fingerprint-канал, если MITM может модифицировать и его | Fingerprint — last-line defense, требует независимого канала. |
 
@@ -102,8 +102,8 @@
 |---|---|---|---|
 | Password пользователя | Нигде | Argon2id один раз | Сразу после derive (перезатирается). |
 | KEK (после Argon2id) | В памяти + Android Keystore (wrapped) | Decrypt приватных ключей | При блокировке приложения (`onStop` или 15 мин idle). |
-| X25519 private | Encrypted в `EncryptedSharedPreferences` (Tink keyset) | При decrypt сообщения | После использования в `SecureBytes.wipe()`. |
-| Ed25519 private | Encrypted в `EncryptedSharedPreferences` (Tink keyset) | При encrypt сообщения | После использования в `SecureBytes.wipe()`. |
+| X25519 private | Encrypted в `EncryptedSharedPreferences` | При decrypt сообщения | После использования в `SecureBytes.wipe()`. |
+| Ed25519 private | Encrypted в `EncryptedSharedPreferences` | При encrypt сообщения | После использования в `SecureBytes.wipe()`. |
 | Ephemeral X25519 private | Только в памяти | Derive shared secret | Сразу после derive. |
 | XChaCha20 nonce | В памяти + в STX2 сообщении | Encrypt один раз | После шифрования. |
 | Shared secret | Только в стеке, не сохраняется | HKDF один раз | После derive message_key. |
@@ -116,8 +116,8 @@
 
 Из промпта и `Secure Text — описание Android-проекта.md` §34:
 
-- ❌ Самостоятельно реализуем криптопримитивы. Только Tink, BouncyCastle
-  (для Argon2id через argon2kt) и Android Keystore.
+- ❌ Самостоятельно реализуем криптопримитивы. Только BouncyCastle
+  (`bcprov-jdk18on`; Argon2id — его же `Argon2BytesGenerator`) и Android Keystore.
 - ❌ Логируем приватные ключи, plaintext, password, shared secret.
 - ❌ Отправляем что-либо по сети (нет INTERNET-разрешения).
 - ❌ Используем ECB, CBC без MAC, самописные режимы.
@@ -150,8 +150,7 @@
 
 | Зависимость | Проверка |
 |---|---|
-| `com.google.crypto.tink:tink-android` | Регулярные релизы Google. Fuzz-тесты. Используется в Google Pay, End-to-End. |
-| `com.lambdapioneer.argon2kt:argon2kt` | Open source, JNI binding к reference Argon2 implementation. |
+| `org.bouncycastle:bcprov-jdk18on` | Активный проект (BouncyCastle). Регулярные релизы, Fuzz-тесты. Используется в Java/Android-экосистеме (FIPS-версии). |
 | `androidx.biometric:biometric` | Google official. |
 | `androidx.security:security-crypto` | Google official. |
 | Compose, Hilt, Coroutines | Google official. |
@@ -217,7 +216,8 @@
 5. **Argon2id 64 MiB** — может быть медленным на старых устройствах
    (~1–2 с). Возможна адаптивная настройка (time/mem) по device profile
    в v2.
-6. **Tink keyset файл** хранится в app-private storage, не экспортируется.
+6. **Приватные ключи** (зашифрованные Argon2id-защищённым KEK) хранятся
+   в app-private storage, не экспортируются.
    Backup — отдельный защищённый канал.
 
 ---

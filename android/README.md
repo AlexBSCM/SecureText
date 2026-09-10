@@ -9,7 +9,7 @@
 - Kotlin 2.0 + Jetpack Compose + Material 3
 - minSdk 26, targetSdk/compileSdk 34
 - Hilt (DI), Coroutines + StateFlow, Navigation Compose
-- Tink + argon2kt (добавятся на Этапе 3)
+- BouncyCastle `bcprov-jdk18on` 1.85.2 (X25519, Ed25519, XChaCha20-Poly1305, HKDF-SHA256, Argon2id) — Этап 3
 - Полностью offline — `INTERNET` НЕ запрашивается
 
 ## Структура
@@ -74,9 +74,9 @@ gradle wrapper                 # один раз, для генерации grad
 
 | Этап | Что |
 |---|---|
-| 3 | `crypto/` — Tink + argon2kt обёртки (X25519, Ed25519, XChaCha20, HKDF, Argon2id) |
+| 3 | `crypto/` — BouncyCastle обёртки (X25519, Ed25519, XChaCha20-Poly1305, HKDF-SHA256, Argon2id) + `Stx2Message` — **готово** |
 | 4 | `protocol/` — STX2 Encryptor, Decryptor, Fingerprint, message parse/serialize |
-| 5 | `storage/IdentityStore` — Tink + Android Keystore + Biometric |
+| 5 | `storage/IdentityStore` — Android Keystore + Biometric |
 | 6 | `contacts/` — verified, firstSeen, history |
 | 7 | Реальные экраны Encrypt/Decrypt |
 | 8 | Clipboard + Sharesheet + auto-detect `STX2:` |

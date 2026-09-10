@@ -17,7 +17,7 @@
 | 1 | Fingerprint | `SHA-256(canonical_public_identity_json)`, hex, группы по 4 символа, uppercase. **Python-код содержит дефект: fingerprint не реализован вообще.** Норматив — STX2.md. Дефект зафиксирован, в `secure_text_2.py` нужно дописать fingerprint на следующем шаге (вне Android-этапа). |
 | 2 | AAD/nonce при шифровании приватных ключей | Оставить `ChaCha20-Poly1305` с 12-байтным nonce и AAD=`SecureText private key v2`, как в STX2.md §29 и в Python. Норматив подтверждён. |
 | 3 | Replay protection | **Не включать в v1.** STX2.md §36 явно говорит, что протокол не защищает от replay; реализация — локальная фича приложения. TODO. |
-| 4 | Криптобиблиотека | **Google Tink** (`com.google.crypto.tink:tink-android`). Все примитивы из спецификации есть, активно поддерживается. Argon2id — через отдельный `argon2kt`. |
+| 4 | Криптобиблиотека | **BouncyCastle** (`org.bouncycastle:bcprov-jdk18on`, 1.85.2). Отклонение от предыдущего решения (см. §«Изменение решения по криптобиблиотеке»): Tink не даёт полного контроля над nonce AEAD-режима, что ломает формат STX2; BC — чистый Java, одинаково работает в JVM-тестах и на Android. Argon2id — через встроенный `Argon2BytesGenerator`. |
 | 5 | Verified-флаг и история ключей контактов | **Включить**: `verified`, `firstSeen`, `lastSeen`, история предыдущих Ed25519 pub. Локальное хранилище, interop не ломает. |
 | 6 | Политика паролей | Минимум 8 символов, рекомендация 12+. Совместимо с Python. |
 | 7 | QR-код | **Только текстовый импорт/экспорт.** QR отложен. |
@@ -166,7 +166,7 @@ fingerprint = SHA-256(canonical_public_identity_json)
 | 1 | Project skeleton (Gradle, Compose, Material 3) | 2 | — |
 | 2 | Модуль `crypto/` (чистый Kotlin, без Android-зависимостей) | 3 | стоп-условие из Этапа 1 |
 | 3 | STX2 protocol (parse/serialize/encrypt/decrypt/sign/verify) | 4 | 2 |
-| 4 | KeyStore-backed хранение приватных ключей (Tink + Android Keystore) | 5 | 2 |
+| 4 | KeyStore-backed хранение приватных ключей (Android Keystore + EncryptedSharedPreferences) | 5 | 2 |
 | 5 | Контакты (verified, firstSeen, lastSeen, history) | 6 | 2, 3 |
 | 6 | Encrypt/Decrypt экраны (Compose) | 7 | 3, 5 |
 | 7 | Clipboard + Sharesheet + auto-detect `STX2:` | 8 | 6 |
@@ -345,7 +345,7 @@ warning при расхождении.
 
 Python пишет в `keys.json.tmp`, затем `os.replace()`. ✅
 В Android — DataStore + atomic write (или прямое использование
-EncryptedSharedPreferences / Tink AndroidKeysetManager).
+EncryptedSharedPreferences).
 
 ### 7.12. UI-скриншоты и clipboard
 
@@ -431,12 +431,33 @@ identity/contacts/decrypt; clipboard cleared через ~60 с
 
 ### 10.1. Криптобиблиотека
 
-**Tink** (`com.google.crypto.tink:tink-android:1.13.0` или новее)
-для X25519, Ed25519, XChaCha20-Poly1305, HKDF-SHA256 + Android Keystore.
+**BouncyCastle** (`org.bouncycastle:bcprov-jdk18on:1.85.2`)
+для X25519, Ed25519, XChaCha20-Poly1305, HKDF-SHA256.
 
-Argon2id — **`com.lambdapioneer.argon2kt:argon2kt`** (JNI binding к
-reference Argon2). Параметры: time=3, mem=64 MiB, par=2, hash_len=32,
+Argon2id — встроенный `Argon2BytesGenerator` (тот же bcprov).
+Параметры: time=3, mem=64 MiB, par=2, hash_len=32,
 salt=16 — как в Python и STX2.md §29.
+
+> **Изменение решения по криптобиблиотеке.** Ранее (решение №4) была
+> выбрана связка Google Tink + argon2kt. В ходе Этапа 3 выбор заменён на
+> BouncyCastle `bcprov-jdk18on` по причинам:
+> 1. **Формат STX2 требует явного nonce (24 B) в AEAD.** Tink хайд-байты
+>    nonce внутри keyset/ciphertext и не даёт полного контроля над
+>    wire-форматом → нельзя гарантировать байт-в-байт совместимость
+>    с Python-референсом.
+> 2. **BC — чистый Java**: один и тот же код работает в JVM unit-тестах
+>    (быстрый итеративный цикл против `test_vectors.json`) и на Android
+>    (minSdk 26, без JNI).
+> 3. BC покрывает все нужные примитивы: `X25519Agreement`,
+>    `Ed25519Signer`, `XChaCha20Poly1305` (extended-nonce),
+>    `HKDFBytesGenerator`, `Argon2BytesGenerator` (поддержка Argon2id
+>    v1.3, параллельность 2 — чего не даёт argon2kt по умолчанию).
+> 4. Меньше зависимостей (один jar вместо Tink + JNA + lazysodium +
+>    argon2kt) и меньше риск конфликтов версий.
+>
+> Проверено аудитом API (javap) и набором тестов по `test_vectors.json`:
+> все 5 positive- и 7 negative-векторов проходят, включая точный
+> ciphertext XChaCha20-Poly1305 и Argon2id-вектор из Аргона.
 
 ### 10.2. SDK
 
@@ -451,19 +472,19 @@ salt=16 — как в Python и STX2.md §29.
 - **ViewModel + StateFlow.**
 - **Hilt** для DI.
 - **DataStore Preferences** для контактов и настроек.
-- Tink keyset — через `AndroidKeysetManager` (внутри использует
-  EncryptedSharedPreferences + Keystore).
+- Private-ключи: `EncryptedSharedPreferences` (AES-GCM, Keystore-ключ);
+  KEK из Argon2id оборачивается Keystore-ключом через прямой API.
 
 ### 10.4. Архитектура пакетов
 
 ```
 app/
-├── crypto/                           # Tink + argon2kt обёртки
-│   ├── primitives/                   # X25519, Ed25519, XChaCha20, HKDF
+├── crypto/                           # BouncyCastle обёртки
+│   ├── primitives/                   # X25519, Ed25519, XChaCha20Poly1305, HkdfSha256
 │   ├── argon2/                       # Argon2id
-│   ├── keywrap/                      # Keystore-обёртка KEK
-│   └── util/                         # Base64URL, hex, secure random
-├── protocol/                         # STX2: parse/serialize/encrypt/decrypt
+│   ├── Stx2Message.kt                # encrypt/decrypt, public identity, fingerprint
+│   ├── Stx2Constants.kt / CanonicalJson.kt / Base64Url.kt / Hex.kt / CryptoRandom.kt
+├── protocol/                         # STX2: (план; код пока в crypto/Stx2Message.kt)
 │   ├── Stx2Message.kt
 │   ├── Stx2PublicIdentity.kt
 │   ├── Stx2Fingerprint.kt
@@ -521,7 +542,7 @@ app/
    (пустые). Без crypto. Цель: проект собирается.
 2. **Этап 3** — `crypto/primitives` + `crypto/argon2` + `crypto/util`.
 3. **Этап 4** — `protocol/` (Stx2Message, Encryptor, Decryptor, Fingerprint).
-4. **Этап 5** — `storage/IdentityStore` (Tink + Android Keystore + Biometric).
+4. **Этап 5** — `storage/IdentityStore` (Android Keystore + Biometric).
 5. **Этап 6** — `contacts/` (verified, history, firstSeen).
 6. **Этап 7** — UI: Encrypt/Decrypt экраны.
 7. **Этап 8** — Clipboard + Sharesheet.

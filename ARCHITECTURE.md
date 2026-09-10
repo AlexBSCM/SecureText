@@ -16,8 +16,8 @@
 | DI | Hilt | 2.51+ |
 | Async | Coroutines + StateFlow | 1.8+ |
 | Persistence | DataStore Preferences + JSON | 1.1+ |
-| Crypto | Google Tink | 1.13+ |
-| Argon2id | `com.lambdapioneer.argon2kt:argon2kt` | 1.2+ |
+| Crypto | BouncyCastle (`org.bouncycastle:bcprov-jdk18on`) | 1.85.2 |
+| Argon2id | BouncyCastle `Argon2BytesGenerator` (в составе bcprov) | 1.85.2 |
 | Biometric | `androidx.biometric:biometric` | 1.2+ |
 | minSdk | 26 (Android 8.0) | — |
 | targetSdk / compileSdk | 34 (Android 14) | — |
@@ -29,12 +29,16 @@
 
 ```
 app/
-├── crypto/                           # Tink + argon2kt обёртки
-│   ├── primitives/                   # X25519, Ed25519, XChaCha20, HKDF
+├── crypto/                           # BouncyCastle обёртки (чистый JVM, без android.*)
+│   ├── primitives/                   # X25519, Ed25519, XChaCha20Poly1305, HkdfSha256
 │   ├── argon2/                       # Argon2id
-│   ├── keywrap/                      # Keystore-обёртка KEK
-│   └── util/                         # Base64URL, hex, secure random, secure wipe
-├── protocol/                         # STX2: parse/serialize/encrypt/decrypt
+│   ├── Stx2Message.kt                # encrypt/decrypt, public identity, fingerprint
+│   ├── Stx2Constants.kt
+│   ├── CanonicalJson.kt              # Python-совместимая канонизация JSON
+│   ├── Base64Url.kt
+│   ├── Hex.kt
+│   └── CryptoRandom.kt
+├── protocol/                         # STX2: (план; код пока в crypto/Stx2Message.kt)
 │   ├── Stx2Message.kt
 │   ├── Stx2PublicIdentity.kt
 │   ├── Stx2Fingerprint.kt
@@ -88,7 +92,7 @@ app/
 ┌────────────────┐ ┌────────────┐ ┌──────────────┐
 │ protocol/      │ │ crypto/    │ │ storage/     │
 │ Encryptor,     │ │ primitives │ │ IdentityStore│
-│ Decryptor,     │ │ (Tink)     │ │ ContactStore │
+│ Decryptor,     │ │ (BouncyCastle)│ │ ContactStore │
 │ Fingerprint    │ └────────────┘ └──────────────┘
 └────────────────┘
 ```
@@ -123,8 +127,9 @@ encrypted_x25519_private (48 B)        # 32 + 16 tag
 encrypted_ed25519_private (48 B)
 ```
 
-KEK дополнительно оборачивается Android Keystore-ключом (Tink
-`AndroidKeysetManager`): биометрия разблокирует Keystore → unwrap KEK →
+KEK дополнительно оборачивается Android Keystore-ключом
+(прямой API Keystore: `KeyGenParameterSpec` + AES-GCM, без Tink):
+биометрия разблокирует Keystore → unwrap KEK →
 ChaCha20-Poly1305 decrypt приватных ключей.
 
 ### 3.2. Контакты
@@ -220,12 +225,13 @@ UI.DecryptScreen → ViewModel.decrypt(stx2Message)
       1. IdentityStore.getX25519Private()  // requires unlocked
       2. Protocol.Decryptor.decrypt(stx2Message, recipient_x_priv, contactRepo)
          a. parse + validate prefix + version + fields
-         b. lookup contact by sender_ed25519 → Contact?
-         c. if Contact && sender_ed25519 != Contact.ed25519 → KEY_CHANGE_WARNING
-         d. verify Ed25519 signature (mandatory)
-         e. shared = recipient_x_priv.exchange(epk)
-         f. message_key = HKDF-SHA256(shared, None, ..., 32)
-         g. plaintext = XChaCha20-Poly1305.decrypt(message_key, nonce, ct, aad="STX2")
+         b. shared = recipient_x_priv.exchange(epk)
+         c. message_key = HKDF-SHA256(shared, None, ..., 32)
+         d. plaintext = XChaCha20-Poly1305.decrypt(message_key, nonce, ct, aad="STX2")
+            // НЕУДАЧА здесь → DECRYPT_FAIL (проверяется ДО подписи, см. negative_vectors)
+         e. lookup contact by sender_ed25519 → Contact?
+         f. if Contact && sender_ed25519 != Contact.ed25519 → KEY_CHANGE_WARNING
+         g. verify Ed25519 signature (mandatory)   // НЕУДАЧА → SIGNATURE_FAIL
          h. return DecryptionResult(plaintext, sender_key, signatureValid, contactStatus)
   → UI: показать plaintext + статус подписи + статус контакта
 ```
