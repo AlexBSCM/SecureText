@@ -1,5 +1,7 @@
-package com.securetext.app.crypto
+package com.securetext.app.protocol
 
+import com.securetext.app.crypto.Base64Url
+import com.securetext.app.crypto.Hex
 import com.securetext.app.crypto.primitives.Ed25519
 import com.securetext.app.crypto.primitives.X25519
 import org.junit.Assert.assertArrayEquals
@@ -34,10 +36,10 @@ class Stx2MessageTest {
         val edPub = Hex.decode("8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c")
         val xPub = Hex.decode("2fe57da347cd62431528daac5fbb290730fff684afc4cfc2ed90995f58cb3b74")
 
-        val identity = Stx2Message.buildPublicIdentity(edPub, xPub)
+        val identity = Stx2PublicIdentity.build(edPub, xPub)
         assertTrue(identity.startsWith("STX-PUB2:"))
 
-        val parsed = Stx2Message.parsePublicIdentity(identity)
+        val parsed = Stx2PublicIdentity.parse(identity)
         assertArrayEquals(edPub, parsed.ed25519Public)
         assertArrayEquals(xPub, parsed.x25519Public)
     }

@@ -38,12 +38,13 @@ app/
 │   ├── Base64Url.kt
 │   ├── Hex.kt
 │   └── CryptoRandom.kt
-├── protocol/                         # STX2: (план; код пока в crypto/Stx2Message.kt)
-│   ├── Stx2Message.kt
-│   ├── Stx2PublicIdentity.kt
-│   ├── Stx2Fingerprint.kt
-│   ├── Encryptor.kt
-│   └── Decryptor.kt
+├── protocol/                         # STX2: чистый JVM, без android.*
+│   ├── Stx2Message.kt                # кодек: encrypt/decrypt, исключения, DecryptionResult
+│   ├── Stx2PublicIdentity.kt         # PublicIdentity build/parse
+│   ├── Stx2Fingerprint.kt            # fingerprint (SHA-256, 8 групп по 4)
+│   ├── Encryptor.kt                  # шифрование со случайным ephemeral+nonce
+│   ├── Decryptor.kt                  # decryptWithOutcome → типизированные исходы
+│   └── Stx2Detector.kt               # авто-детект STX2: в тексте (для Stage 8)
 ├── storage/
 │   ├── IdentityStore.kt
 │   ├── ContactStore.kt

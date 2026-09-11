@@ -23,16 +23,21 @@ android/
 │   │   ├── java/com/securetext/app/
 │   │   │   ├── MainActivity.kt
 │   │   │   ├── SecureTextApplication.kt
-│   │   │   ├── navigation/      # NavHost + Destinations
+│   │   │   ├── navigation/      # NavHost + AppRoot (VaultState gating) + Destinations
+│   │   │   ├── crypto/          # примитивы (BC), keywrap, SecureWipe
+│   │   │   ├── protocol/        # Stx2Message, Encryptor, Decryptor, Identity, Fingerprint, Detector
+│   │   │   ├── storage/         # IdentityStore (DataStore vault)
+│   │   │   ├── security/        # BiometricUnlock
 │   │   │   ├── ui/
 │   │   │   │   ├── theme/        # Material 3 colors
+│   │   │   │   ├── vault/        # CreatePassword + Unlock
 │   │   │   │   ├── common/       # PlaceholderScreen
-│   │   │   │   ├── identity/     # My Identity (заглушка)
+│   │   │   │   ├── identity/     # My Identity (реализован: identity + fingerprint)
 │   │   │   │   ├── encrypt/      # Encrypt (заглушка)
 │   │   │   │   ├── decrypt/      # Decrypt (заглушка)
 │   │   │   │   ├── contacts/     # Contacts (заглушка)
 │   │   │   │   └── settings/     # Settings (заглушка)
-│   │   │   └── (crypto/, protocol/, storage/, contacts/, share/, security/ — добавятся позже)
+│   │   │   └── (contacts/, share/ — добавятся позже)
 │   │   └── res/
 │   │       ├── values/strings.xml          (en)
 │   │       ├── values-ru/strings.xml       (ru)
@@ -75,7 +80,7 @@ gradle wrapper                 # один раз, для генерации grad
 | Этап | Что |
 |---|---|
 | 3 | `crypto/` — BouncyCastle обёртки (X25519, Ed25519, XChaCha20-Poly1305, HKDF-SHA256, Argon2id) + `Stx2Message` — **готово** |
-| 4 | `protocol/` — STX2 Encryptor, Decryptor, Fingerprint, message parse/serialize |
+| 4 | `protocol/` — STX2 Encryptor, Decryptor, Fingerprint, message parse/serialize — **готово** |
 | 5 | `storage/IdentityStore` — Android Keystore + Biometric |
 | 6 | `contacts/` — verified, firstSeen, history |
 | 7 | Реальные экраны Encrypt/Decrypt |

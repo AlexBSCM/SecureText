@@ -482,14 +482,15 @@ app/
 ├── crypto/                           # BouncyCastle обёртки
 │   ├── primitives/                   # X25519, Ed25519, XChaCha20Poly1305, HkdfSha256
 │   ├── argon2/                       # Argon2id
-│   ├── Stx2Message.kt                # encrypt/decrypt, public identity, fingerprint
-│   ├── Stx2Constants.kt / CanonicalJson.kt / Base64Url.kt / Hex.kt / CryptoRandom.kt
-├── protocol/                         # STX2: (план; код пока в crypto/Stx2Message.kt)
+│   ├── Stx2Constants.kt / CanonicalJson.kt / Base64Url.kt / Hex.kt / CryptoRandom.kt / SecureWipe.kt
+│   ├── keywrap/                      # KeyVaultCrypto (KEK), KeystoreKekWrapper
+├── protocol/                         # STX2: кодек + Encryptor/Decryptor/Detector (реализовано)
 │   ├── Stx2Message.kt
 │   ├── Stx2PublicIdentity.kt
 │   ├── Stx2Fingerprint.kt
 │   ├── Encryptor.kt
-│   └── Decryptor.kt
+│   ├── Decryptor.kt
+│   └── Stx2Detector.kt
 ├── storage/
 │   ├── IdentityStore.kt
 │   ├── ContactStore.kt

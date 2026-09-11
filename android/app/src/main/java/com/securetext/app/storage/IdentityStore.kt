@@ -7,13 +7,14 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.securetext.app.crypto.Base64Url
 import com.securetext.app.crypto.CryptoRandom
 import com.securetext.app.crypto.SecureWipe
-import com.securetext.app.crypto.Stx2Message
 import com.securetext.app.crypto.keywrap.KeystoreKekWrapper
 import com.securetext.app.crypto.keywrap.KeyVaultCrypto
 import com.securetext.app.crypto.keywrap.KeyVaultException
 import com.securetext.app.crypto.keywrap.WrongPasswordException
 import com.securetext.app.crypto.primitives.Ed25519
 import com.securetext.app.crypto.primitives.X25519
+import com.securetext.app.protocol.Stx2Fingerprint
+import com.securetext.app.protocol.Stx2PublicIdentity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -159,12 +160,12 @@ class IdentityStore @Inject constructor(
 
     suspend fun publicIdentity(): String {
         val record = readRecord() ?: throw IdentityNotExistsException()
-        return Stx2Message.buildPublicIdentity(
+        return Stx2PublicIdentity.build(
             record.ed25519PublicBytes(), record.x25519PublicBytes()
         )
     }
 
-    suspend fun fingerprint(): String = Stx2Message.fingerprint(publicIdentity())
+    suspend fun fingerprint(): String = Stx2Fingerprint.compute(publicIdentity())
 
     fun lock() {
         SecureWipe.wipe(cachedKek, cachedX25519Private, cachedEd25519Private)

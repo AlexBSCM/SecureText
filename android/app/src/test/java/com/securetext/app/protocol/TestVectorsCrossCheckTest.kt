@@ -1,9 +1,9 @@
-package com.securetext.app.crypto
+package com.securetext.app.protocol
 
+import com.securetext.app.crypto.Hex
 import com.securetext.app.crypto.primitives.Ed25519
 import com.securetext.app.crypto.primitives.X25519
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -89,13 +89,13 @@ class TestVectorsCrossCheckTest {
             val edPub = recipient.hex("ed25519_public_hex")
             val xPub = recipient.hex("x25519_public_hex")
 
-            val identity = Stx2Message.buildPublicIdentity(edPub, xPub)
+            val identity = Stx2PublicIdentity.build(edPub, xPub)
             assertEquals("Identity mismatch for ${v.str("name")}", recipient.str("public_identity"), identity)
 
-            val fp = Stx2Message.fingerprint(identity)
+            val fp = Stx2Fingerprint.compute(identity)
             assertEquals("Fingerprint mismatch for ${v.str("name")}", recipient.str("fingerprint"), fp)
 
-            val parsed = Stx2Message.parsePublicIdentity(identity)
+            val parsed = Stx2PublicIdentity.parse(identity)
             assertArrayEquals(edPub, parsed.ed25519Public)
             assertArrayEquals(xPub, parsed.x25519Public)
         }

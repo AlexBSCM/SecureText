@@ -53,7 +53,7 @@ Secure Text/
 - **Этап 1** ✅ Анализ, документация, тест-вектора, чек-поинт Python↔STX2.
 - **Этап 2** ✅ Gradle skeleton, Compose, 5 экранов-заглушек, навигация, Hilt.
 - **Этап 3** ✅ crypto-слой (BouncyCastle `bcprov-jdk18on`: X25519, Ed25519, XChaCha20-Poly1305, HKDF-SHA256, Argon2id) — примитивы + `Stx2Message` + тесты по `test_vectors.json`.
-- **Этап 4** ⏳ STX2 protocol (частично готов: encrypt/decrypt/identity/fingerprint в `crypto/Stx2Message`).
+- **Этап 4** ✅ STX2 protocol (`protocol/`: Stx2Message кодек, Encryptor, Decryptor с типизированными исходами, Stx2PublicIdentity, Stx2Fingerprint, Stx2Detector).
 - **Этап 5** ✅ Хранение ключей + Biometric (IdentityStore, Keystore-wrapped KEK, CreatePassword/Unlock UI).
 - **Этап 6** ⏳ Контакты (verified, history).
 - **Этап 7** ⏳ Encrypt/Decrypt UI.
