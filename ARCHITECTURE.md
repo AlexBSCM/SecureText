@@ -18,7 +18,7 @@
 | Persistence | DataStore Preferences + JSON | 1.1+ |
 | Crypto | BouncyCastle (`org.bouncycastle:bcprov-jdk18on`) | 1.85.2 |
 | Argon2id | BouncyCastle `Argon2BytesGenerator` (в составе bcprov) | 1.85.2 |
-| Biometric | `androidx.biometric:biometric` | 1.2+ |
+| Biometric | `androidx.biometric:biometric` | 1.1.0 (последний стабильный) |
 | minSdk | 26 (Android 8.0) | — |
 | targetSdk / compileSdk | 34 (Android 14) | — |
 | Build | Gradle 8.7+, AGP 8.5+ | — |

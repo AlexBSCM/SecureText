@@ -12,4 +12,27 @@
     <string name="screen_settings_title">Настройки</string>
     <string name="placeholder_short">Ещё не реализовано</string>
     <string name="placeholder_long">Этот экран будет заполнен на следующих этапах. Сейчас только скелетон.</string>
+
+    <string name="vault_create_title">Создайте пароль Secure Text</string>
+    <string name="vault_create_subtitle">Этот пароль защищает ваши приватные ключи. Он не покидает устройство.</string>
+    <string name="vault_password">Пароль (8+ символов)</string>
+    <string name="vault_confirm">Подтвердите пароль</string>
+    <string name="vault_mismatch">Пароли не совпадают</string>
+    <string name="vault_create_button">Создать идентичность</string>
+    <string name="vault_password_warning">Если вы забудете этот пароль, ключи восстановить невозможно.</string>
+    <string name="vault_unlock_title">Разблокировать Secure Text</string>
+    <string name="vault_unlock_button">Разблокировать</string>
+    <string name="vault_unlock_biometric">Войти по биометрии</string>
+    <string name="vault_biometric_title">Разблокировать Secure Text</string>
+    <string name="vault_biometric_subtitle">Подтвердите личность, чтобы разблокировать ключи</string>
+    <string name="vault_loading">Обработка…</string>
+    <string name="vault_error_min_length">Пароль должен быть не короче 8 символов</string>
+    <string name="vault_error_exists">Идентичность уже создана</string>
+    <string name="vault_error_wrong_password">Неверный пароль</string>
+    <string name="vault_error_keystore_invalidated">Биометрия недоступна — войдите один раз паролем, чтобы включить её снова</string>
+    <string name="vault_error_failed">Операция не удалась</string>
+    <string name="identity_public_label">Публичная идентичность (можно передавать)</string>
+    <string name="identity_fingerprint_label">Отпечаток (сверьте по доверенному каналу)</string>
+    <string name="identity_copy">Копировать</string>
+    <string name="identity_loading">Загрузка…</string>
 </resources>

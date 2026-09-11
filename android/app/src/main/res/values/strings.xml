@@ -12,4 +12,27 @@
     <string name="screen_settings_title">Settings</string>
     <string name="placeholder_short">Not implemented yet</string>
     <string name="placeholder_long">This screen will be filled in a later stage. Skeleton only.</string>
+
+    <string name="vault_create_title">Create your Secure Text password</string>
+    <string name="vault_create_subtitle">This password protects your private keys. It never leaves this device.</string>
+    <string name="vault_password">Password (8+ characters)</string>
+    <string name="vault_confirm">Confirm password</string>
+    <string name="vault_mismatch">Passwords do not match</string>
+    <string name="vault_create_button">Create identity</string>
+    <string name="vault_password_warning">If you forget this password, your keys cannot be recovered.</string>
+    <string name="vault_unlock_title">Unlock Secure Text</string>
+    <string name="vault_unlock_button">Unlock</string>
+    <string name="vault_unlock_biometric">Use biometrics</string>
+    <string name="vault_biometric_title">Unlock Secure Text</string>
+    <string name="vault_biometric_subtitle">Confirm your identity to unlock keys</string>
+    <string name="vault_loading">Working…</string>
+    <string name="vault_error_min_length">Password must be at least 8 characters</string>
+    <string name="vault_error_exists">Identity already exists</string>
+    <string name="vault_error_wrong_password">Wrong password</string>
+    <string name="vault_error_keystore_invalidated">Biometric unlock unavailable — unlock with password once to re-enable</string>
+    <string name="vault_error_failed">Operation failed</string>
+    <string name="identity_public_label">Public identity (share this)</string>
+    <string name="identity_fingerprint_label">Fingerprint (verify via a trusted channel)</string>
+    <string name="identity_copy">Copy</string>
+    <string name="identity_loading">Loading…</string>
 </resources>

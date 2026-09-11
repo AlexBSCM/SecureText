@@ -1,22 +1,31 @@
 package com.securetext.app
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.securetext.app.navigation.SecureTextNavHost
+import androidx.fragment.app.FragmentActivity
+import com.securetext.app.navigation.SecureTextAppRoot
+import com.securetext.app.storage.IdentityStore
 import com.securetext.app.ui.theme.SecureTextTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
+    @Inject lateinit var identityStore: IdentityStore
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SecureTextTheme {
-                SecureTextNavHost()
+                SecureTextAppRoot()
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        identityStore.lock()
     }
 }

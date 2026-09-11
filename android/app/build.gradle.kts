@@ -94,6 +94,7 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     implementation(libs.bouncycastle.prov)
+    implementation(libs.androidx.biometric)
 
     testImplementation(libs.junit)
     testImplementation(libs.turbine)
